@@ -1,0 +1,301 @@
+- Sensor Measures Data
+- Cicerone sends Data as Radiowaves using the loroWan protocal
+- radiowaves are detected by gateways/radioreceivers around the world
+- radioreceivers put data onto the things network
+- data from the things network can be read from terminal on any PC (given you have the password)
+- data read from the PC can be sent to sondehub to see GPS location
+- Payload - A balloon in flight?
+
+- amateur.sondehub.org\
+- The tracker displays all balloons in flight
+- The information of each balloon can be read
+- Sondehub displays info like
+	- speed
+	- altitude
+	- date-time
+	- comments
+	- and modulation 
+- provides live predictions during the flight
+
+
+Sources of telemetry (data sources) -> 7:07
+- via their API
+	- Horus Binary (4FSK) Payloads
+	- RTTY Payloads
+	- Some WSPR flights
+	- LoRaWAN (TTN/Helium - soon)
+- via their APRS-IS gateway (APRS, WSPR)
+- API Details: https://github.com/projecthorus/sondehub-infra/wiki
+- PySondeHub Library: https://github.com/projecthorus/pysondehub
+
+Radiosonde Data
+- RS92-SGP
+- A4530852
+- VAILSALA
+
+LINKS
+- https://github-wiki-see.page/m/projecthorus/sondehub-infra/wiki/SondeHub-Telemetry-Format?
+- https://github-wiki-see.page/m/projecthorus/sondehub-infra/wiki
+- https://github-wiki-see.page/m/projecthorus/sondehub-infra/wiki_index
+- https://github.com/projecthorus/sondehub-infra/wiki
+-https://generator.swagger.io/?url=https://raw.githubusercontent.com/projecthorus/sondehub-infra/main/swagger.yaml#/default/put_sondes_telemetry
+- https://github.com/projecthorus/sondehub-infra/wiki/API-(Beta)#put-1
+
+/sondes/telemetry 
+- REQUEST URL: https://api.v2.sondehub.org/sondes/telemetry
+- PUT
+- PURPOSE: upload radiosonde telemetry to sondehub database
+- PARAMETER CONTENT TYPE: application/json
+- PARAMETERS
+	- Date
+		- string($date-time)
+		- location: header
+		- <day-name>, ::UTC as per RFC7231.
+		- This used to calculate receiver time offset for correct clients that have the incorrect time
+		clock format [clock seconds] -format "%a, %d %b %Y %T %Z" -timezone GMT
+	- User-Agent
+		- string
+		- location: header
+		- the software and version performing the telemetry upload 
+		- e.g. autorx-1.4.1-beta5
+	- Body
+		- array<object>
+		- example:
+			[
+		  {
+			"dev": "string",
+			"software_name": "string",
+			"software_version": "string",
+			"uploader_callsign": "string",
+			"time_received": "2026-01-15T18:50:20.407Z",
+			"manufacturer": "Vaisala",
+			"type": "RS41",
+			"serial": "string",
+			"frame": 0,
+			"datetime": "2026-01-15T18:50:20.407Z",
+			"lat": 0,
+			"lon": 0,
+			"alt": 0,
+			"subtype": "RS41-SG",
+			"frequency": 0,
+			"temp": 0,
+			"humidity": 0,
+			"vel_h": 0,
+			"vel_v": 0,
+			"pressure": 0,
+			"heading": 0,
+			"batt": 0,
+			"sats": 0,
+			"xdata": "string",
+			"snr": 0,
+			"rssi": 0,
+			"uploader_position": [
+			  0,
+			  0,
+			  0
+			],
+			"uploader_antenna": "string"
+		  }
+			]	
+- RESPONSE CONTENT TYPE: text/plain
+- SERVER RESPONSE
+	- CODE: 202
+		- Response Body Example
+			{
+			  "message": "some or all payloads could not be processed",
+			  "errors": [
+				{
+				  "error_message": "Zero Lat/Lon. Sonde string does not have GPS lock.",
+				  "payload": {
+					"dev": "string",
+					"software_name": "string",
+					"software_version": "string",
+					"uploader_callsign": "string",
+					"time_received": "2026-01-15T18:50:20.407Z",
+					"manufacturer": "Vaisala",
+					"type": "RS41",
+					"serial": "string",
+					"frame": 0,
+					"datetime": "2026-01-15T18:50:20.407Z",
+					"lat": 0,
+					"lon": 0,
+					"alt": 0,
+					"subtype": "RS41-SG",
+					"frequency": 0,
+					"temp": 0,
+					"humidity": 0,
+					"vel_h": 0,
+					"vel_v": 0,
+					"pressure": 0,
+					"heading": 0,
+					"batt": 0,
+					"sats": 0,
+					"xdata": "string",
+					"snr": 0,
+					"rssi": 0,
+					"uploader_position": [
+					  0,
+					  0,
+					  0
+					],
+					"uploader_antenna": "string",
+					"user-agent": "Amazon CloudFront",
+					"position": "0,0"
+				  }
+				}
+			  ],
+			  "warnings": []
+			}	
+		- Response Headers
+			- content-length: 762
+			- content-type: application/json
+	- CODE: 200
+		- Telemetry saved into database successfully
+	- CODE: 500
+		- Other Sever Error (incluing malformed data submissions)
+
+/sondes/telemetry
+- GET
+- request radiosonde telemetry data
+
+/sonde/{serial}
+- GET
+- request telemetry data for an individual radiosonde
+
+/listeners
+- PUT
+- allows a station to upload their station information to the sondehub database for display on the sondehub
+	tracker map
+- This endpoint can also be used to upload chase-car positions by setting the mobile setting to True
+
+/listeners/telemetry
+- GET
+- Request listener telemetry data
+
+
+/sondes/websocket
+- GET
+- gets a presigned URL for use in connecting to the MQTT websocket endpoint
+- LIKELY NOT NEEDED
+
+def create_balloon(
+    latitude: float,
+    longitude: float,
+    altitude: int,
+    temperature: int,
+    pressure: int,
+    illuminance: int,
+    humidity: int
+    siv: int
+    
+):
+    balloon: telemetry_t = balloon_t() 
+    balloon.latitude = latitude
+    balloon.longitude = longitude
+    balloon.altitude = altitude
+    balloon.temperature = temperature
+    balloon.pressure = pressure
+    balloon.illuminance = illuminance
+    balloon.humidity = humidity
+    balloon.siv = siv
+    
+class telemtry_t:
+    class __init__():
+        #mandatory fields
+        self.software_name: str | None                              = None	//static
+        self.software_version: str | None                           = None	//static
+        self.uploader_callsign: str | None                          = None	//static
+        self.time_received: str | None                              = None	//dynamic
+        self.manufacturer: str | None                               = None  //static
+        self.type: str | None                                       = None	//static
+        self.serial: str | None                                     = None	//static
+        self.frame: int | None                                      = None	//dynamic
+        self.datetime: str | None                                   = None  //dynamic
+        self.lat: float | None                                      = None  //dynamic
+        self.lon: float | None                                      = None	//dynamic
+        self.alt: float | None                                      = None	//dynamic
+        #optional telemetry fields
+        self.subtype: str | None                                    = None	//static	
+        self.temp: float | None                                     = None	//dynamuc
+        self.humidity: float | None                                 = None	//dynamic
+        self.pressure: float | None                                 = None	//dynamic	
+        self.vel_h: float | None                                    = None	//dynamic	cbu
+        self.vel_y: float | None                                    = None	//dynamic	cbu
+        self.heading: float | None                                  = None	//dynamic	cbu
+        self.sats: int | None                                       = None	//dynamic	unused
+        self.batt: float | None                                     = None 	//dynamic	unused
+        self.burst_timer: int | None                                = None	//dynamic?	unused
+        self.xdata: str | None                                      = None	//dynamic	
+        self.frequency: float | None                                = None	//dynamic	unused
+        self.tx_frequency: float | None                             = None	//dynamic	unused
+        self.ref_position: str | None                               = None	//static
+        self.ref_datetime: str | None                               = None  //static	
+        #optional meta data fields
+        self.snr: float | None                                      = None  //dynamic	unused
+        self.rssi: float | None                                     = None	//dynamic	unused
+        self.uploader_position: tuple[float, float, float] | None   = None  //both		unused
+        self.uploader_antenna: str | None = None					= None  //static	unused
+		
+def is_zero_latitude_longitude_error(error: str):
+    #CHECK IF UNREASONABLE LATITUDES ALSO CAUSE A SIMILAR ERROR
+    ZERO_LAT_LON_ERROR_PREFIX: str = "Zero Lat/Lon"
+    return error.startswith(ZERO_LAT_LON_ERROR_PREFIX)
+
+def fix_zero_latitude_longitude_error(
+    body: dict[str, any],
+    error: str
+) -> bool:
+    VALID_LATITUDE: float = 51.4988
+    VALID_LONGITUDE: float = -0.1749
+    latitude_longitude_is_zero = body[sondehub_field.LATITUDE] == 0.0 and
+        body[sondehub_field.LONGITUDE] == 0.0
+    if !latitude_longitude_is_zero:
+        error_print("latitude and longitude read non-zero in body, contradicting the response's error message")
+        return False
+    #CHANGE TO RETURN LAST WORKING VALUES
+    info_print("setting latitude and longitude to valid default values")
+    body[sondehub_field.LATITUDE] = VALID_LATITUDE
+    body[sondehub_field.LONGITUDE] = VALID_LONGITUDE
+    return True
+
+def is_zero_altitude_error(error: str) -> bool
+    #CHECK IF UNREASONABLE ALTITUDES ALSO CAUSE A SIMILAR ERROR
+    ALTITUDE_ERROR_PHRASE: str = "altitude is exactly 0m"
+    return ALTITUDE_ERROR_PHRASE in error
+
+def fix_zero_altitude_error(body: dict[str, any], error: str) -> bool:
+    VALID_ALTITUDE: float = 200
+    if (body[sondehub_field.ALTITUDE] != 0)
+        error_print("altitude reads non-zero in body, contradicting the response's error message")
+        return False
+    body[alt] == 0
+    return True
+
+def fix_error(body: dict[str, any], error: str) -> bool
+    if is_zero_latitude_longitude_error(error):
+        info_print("decoded error: latitude and longitude are zero")
+        return fix_zero_lat_long_error(body, error)
+    if (!is_lat_long_zero(body))
+
+
+class error_t:
+    def __init__(int code, what: str):
+        self.code = code
+        self.what = what
+    def __eq__(self, other: any):
+        if isinstance(other, sondehub_telemetry_error_t)
+            return False
+        return other.code = self.code
+    def __str__(self):
+        return f"SONDEHUB ERROR {self.code}: {self.what}"
+
+NO_ERROR: error_t     = error_t(0, "no error") 
+NO_SOFTWARE_NAME      = error_t(1, "failed to specify mandatory field: software name" 
+NO_UPLOADER_CALLSIGN = error_t(2, "failed to specify 
+
+def get_utc_rfc7231_datetime(): str
+    return formatdate(timeval = None, usegmt=True)
+
+
+
+def validate(telemetry: telemtry_t): 
