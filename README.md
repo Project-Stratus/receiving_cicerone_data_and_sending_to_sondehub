@@ -13,6 +13,7 @@ git clone https://github.com/Project-Stratus/receiving_cicerone_data_and_sending
 -  re-define the values for the following global variables found in main.py:
     - `app_id = "test-stratus"`
     - `access_key = "NNSXS.G4Q4JAWU7T26BNCY54K34AFKIWBDCXJPUOIZHKY.CQYRXMARINPZDH4RVM2LN5T7I57BXO6JEMJ6XTHQTIBSSSAOID7A"`
-    - `region = "eu1"  # e.g. eu1, nam1, au1 etc.`
+- Perhaps redefines these global variables found in `main.py` but its highly unlikely
+    -  `region = "eu1"  # e.g. eu1, nam1, au1 etc.`
     - `port = 8883`
 -  run main.py
